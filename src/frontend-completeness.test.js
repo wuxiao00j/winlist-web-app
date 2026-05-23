@@ -221,7 +221,9 @@ describe('frontend completeness surfaces', () => {
     expect(styles).toContain('place-items: stretch');
     expect(styles).toContain('appearance: none');
     expect(styles).toContain('align-self: stretch');
-    expect(styles).toContain('object-fit: cover');
+    expect(styles).toContain('object-fit: contain');
+    expect(styles).toContain('padding: 6px 10px 0');
+    expect(styles).toContain('object-position: center center');
     expect(styles).toContain('min-height: 100dvh');
     expect(styles).toContain('height: auto');
     expect(styles).toContain('overflow: visible');

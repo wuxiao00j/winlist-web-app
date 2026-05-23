@@ -240,6 +240,15 @@ describe('frontend completeness surfaces', () => {
     expect(styles).toContain('transform: translateY(-50%)');
   });
 
+  test('mobile browser layout does not keep a fixed 936px shell or overlap footer controls', () => {
+    expect(styles).toContain('min-height: 100dvh');
+    expect(styles).toContain('min-height: calc(100dvh - 16px)');
+    expect(styles).toContain('overflow: visible');
+    expect(styles).toContain('position: static');
+    expect(styles).toContain('margin: 40px auto 4px');
+    expect(styles).toContain('margin: 0 22px');
+  });
+
   test('duration labels use m instead of min', () => {
     expect(source).toContain('return `${hours}h${rest}m`;');
     expect(source).toContain('return `${rest}m`;');

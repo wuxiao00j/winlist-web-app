@@ -2506,11 +2506,24 @@ button {
 
   .phone {
     width: 100vw;
+    min-height: 100dvh;
     border-radius: 46px;
   }
 
   .screen {
-    min-height: calc(100vh - 16px);
+    min-height: calc(100dvh - 16px);
+    overflow: visible;
+  }
+
+  .done-title {
+    position: static;
+    display: block;
+    margin: 40px auto 4px;
+  }
+
+  .bottom-bar {
+    position: static;
+    margin: 0 22px;
   }
 }
 

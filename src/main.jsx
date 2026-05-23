@@ -72,7 +72,7 @@ const DEFAULT_PROFILE = {
   id: 'local-olivia',
   memberId: 'olivia',
   displayName: 'Olivia Vivas',
-  email: '807652164@qq.com',
+  email: '',
   avatar: 'olivia-avatar.jpeg',
   statusId: 'wantFish',
   signature: '今天也要把清单漂亮收尾。'
@@ -90,6 +90,14 @@ const SETTINGS_DEFAULT = {
 const demoClickToContinue = '点高亮处继续';
 const waitForTargetEffect = 720;
 const autoAdvanceDelay = 1500;
+const introStorageKey = 'winlist.onboardingIntroDone';
+const tourStorageKey = 'winlist.guidedTourDone';
+
+const onboardingSlides = [
+  { id: 'intro-need', image: 'onboarding-intro-1.jpg', alt: 'DoDoNow 介绍：能量、焦虑和隐形家务' },
+  { id: 'intro-duration', image: 'onboarding-intro-2.jpg', alt: 'DoDoNow 总耗时功能介绍' },
+  { id: 'intro-summary', image: 'onboarding-intro-3.jpg', alt: 'DoDoNow 功能总览' }
+];
 
 const TOUR_STEPS = [
   {
@@ -370,6 +378,14 @@ function storedSettings() {
   };
 }
 
+function hasSeenIntro() {
+  return localStorage.getItem(introStorageKey) === 'true';
+}
+
+function hasCompletedTour() {
+  return localStorage.getItem(tourStorageKey) === 'true';
+}
+
 function readFileAsDataUrl(file) {
   return new Promise((resolve, reject) => {
     if (!file) {
@@ -456,7 +472,9 @@ function App() {
   const [timeModeMenu, setTimeModeMenu] = useState(null);
   const [holdState, setHoldState] = useState(null);
   const [draggingTask, setDraggingTask] = useState(null);
-  const [tourOpen, setTourOpen] = useState(() => localStorage.getItem('winlist.guidedTourDone') !== 'true');
+  const [introOpen, setIntroOpen] = useState(() => !hasSeenIntro());
+  const [introStepIndex, setIntroStepIndex] = useState(0);
+  const [tourOpen, setTourOpen] = useState(() => hasSeenIntro() && !hasCompletedTour());
   const [tourStepIndex, setTourStepIndex] = useState(0);
   const [tourStepDone, setTourStepDone] = useState(false);
   const tourResetDone = useRef(false);
@@ -1207,16 +1225,37 @@ function App() {
     }, waitForTargetEffect);
   }
 
-  function startTour() {
-    localStorage.removeItem('winlist.guidedTourDone');
+  function beginTourFromIntro() {
+    localStorage.setItem(introStorageKey, 'true');
+    localStorage.removeItem(tourStorageKey);
     resetDemoState();
+    setIntroOpen(false);
+    setIntroStepIndex(0);
+    setTourStepIndex(0);
+    setTourOpen(true);
+  }
+
+  function advanceIntro() {
+    if (introStepIndex >= onboardingSlides.length - 1) {
+      beginTourFromIntro();
+      return;
+    }
+    setIntroStepIndex((value) => Math.min(value + 1, onboardingSlides.length - 1));
+  }
+
+  function startTour() {
+    localStorage.setItem(introStorageKey, 'true');
+    localStorage.removeItem(tourStorageKey);
+    resetDemoState();
+    setIntroOpen(false);
+    setIntroStepIndex(0);
     setTourStepIndex(0);
     setTourOpen(true);
   }
 
   function closeTour() {
     clearTourAdvanceTimers();
-    localStorage.setItem('winlist.guidedTourDone', 'true');
+    localStorage.setItem(tourStorageKey, 'true');
     setTourOpen(false);
     setMenuTarget(null);
   }
@@ -1338,7 +1377,6 @@ function App() {
         </section>
       </div>
 
-      {currentUser && <button className="tour-launcher" type="button" onClick={startTour}>Demo</button>}
       {!authChecked && <div className="auth-status">正在连接 WINlist...</div>}
       {authChecked && !currentUser && <AuthOverlay error={authError} onSubmit={handleAuthSubmit} onOffline={enterOfflineMode} />}
       {(apiError || stateLoading) && currentUser && (
@@ -1444,6 +1482,13 @@ function App() {
         />
       )}
       {pokeBanner && <div className="poke-banner"><Hand size={30} fill="currentColor" /><span>{pokeBanner}</span><button onClick={() => setPokeBanner(null)}><X size={18} /></button></div>}
+      {introOpen && (
+        <OnboardingIntro
+          slides={onboardingSlides}
+          stepIndex={introStepIndex}
+          onNext={advanceIntro}
+        />
+      )}
       <GuidedTour
         open={tourOpen}
         steps={TOUR_STEPS}
@@ -1455,6 +1500,22 @@ function App() {
         onClose={closeTour}
       />
     </main>
+  );
+}
+
+function OnboardingIntro({ slides, stepIndex, onNext }) {
+  const slide = slides[stepIndex];
+  if (!slide) return null;
+  return (
+    <div className="intro-layer" role="dialog" aria-modal="true" aria-label="DoDoNow 介绍">
+      <section className="intro-card">
+        <img src={asset(slide.image)} alt={slide.alt} />
+        <footer>
+          <span>{stepIndex + 1}/{slides.length}</span>
+          <button type="button" onClick={onNext}>下一步</button>
+        </footer>
+      </section>
+    </div>
   );
 }
 
@@ -2554,7 +2615,6 @@ function SideDrawer({ type, profile, onProfileChange, friends, onFriendsChange, 
           <>
             <img className="drawer-avatar" src={imageSource(profile.avatar)} alt="Olivia" />
             <p>ID：{displayName}</p>
-            <p>{email}</p>
             <button onClick={() => setPanel('avatar')}>头像设置</button>
             <button onClick={() => setPanel('profileEdit')}>资料编辑</button>
             <button onClick={() => setPanel('friends')}>好友管理</button>

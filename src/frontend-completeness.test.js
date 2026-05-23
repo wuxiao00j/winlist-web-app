@@ -157,4 +157,30 @@ describe('frontend completeness surfaces', () => {
       expect(source).toContain(tourToken);
     });
   });
+
+  test('first visit shows intro images before the guided tour and removes demo launcher', () => {
+    [
+      'onboardingSlides',
+      'onboarding-intro-1.jpg',
+      'onboarding-intro-2.jpg',
+      'onboarding-intro-3.jpg',
+      'winlist.onboardingIntroDone',
+      'OnboardingIntro',
+      'beginTourFromIntro',
+      'setIntroOpen(false)',
+      'setTourOpen(true)'
+    ].forEach((introToken) => {
+      expect(source).toContain(introToken);
+    });
+    expect(source.indexOf('onboarding-intro-1.jpg')).toBeLessThan(source.indexOf('onboarding-intro-2.jpg'));
+    expect(source.indexOf('onboarding-intro-2.jpg')).toBeLessThan(source.indexOf('onboarding-intro-3.jpg'));
+    expect(source).not.toContain('tour-launcher');
+    expect(source).not.toContain('>Demo<');
+    expect(styles).toContain('.intro-layer');
+  });
+
+  test('profile drawer does not expose the default qq email', () => {
+    expect(source).not.toContain('807652164@qq.com');
+    expect(source).not.toContain('<p>{email}</p>');
+  });
 });

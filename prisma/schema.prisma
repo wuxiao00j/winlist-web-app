@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  displayName  String
+  memberId     String       @unique
+  avatar       String
+  statusId     String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  tasks        Task[]
+  comments     Comment[]
+  pokes        Poke[]
+  sentFriends  Friendship[] @relation("Requester")
+  gotFriends   Friendship[] @relation("Addressee")
+}
+
+model Friendship {
+  id          String   @id @default(cuid())
+  requesterId String
+  addresseeId String
+  status      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  requester   User     @relation("Requester", fields: [requesterId], references: [id], onDelete: Cascade)
+  addressee   User     @relation("Addressee", fields: [addresseeId], references: [id], onDelete: Cascade)
+
+  @@unique([requesterId, addresseeId])
+}
+
+model Task {
+  id           String    @id @default(cuid())
+  ownerId      String
+  category     String
+  title        String
+  minutes      Int
+  checked      Boolean   @default(false)
+  note         String    @default("")
+  subtasksJson String    @default("[]")
+  metaJson     String    @default("{}")
+  sortOrder    Int
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  owner        User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  comments     Comment[]
+  pokes        Poke[]
+
+  @@index([ownerId, category, sortOrder])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  taskId    String
+  authorId  String
+  text      String
+  emoji     String
+  imagePath String?
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Poke {
+  id        String   @id @default(cuid())
+  taskId    String
+  actorId   String
+  createdAt DateTime @default(now())
+  task      Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actor     User     @relation(fields: [actorId], references: [id], onDelete: Cascade)
+}

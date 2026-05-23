@@ -4,3 +4,7 @@ dist
 *.log
 .env
 .env.*
+dev.db
+prisma/dev.db
+.winlist-uploads
+public/uploads

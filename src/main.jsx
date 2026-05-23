@@ -103,9 +103,9 @@ const TOUR_STEPS = [
   {
     id: 'login',
     target: 'auth-login-submit',
-    title: '进入 WINlist',
-    body: '如果你在登录页，先填写账号信息，然后点击这里进入 WINlist。已经进入主界面时，这一步会自动跳过。',
-    targetActionLabel: '点击进入 WINlist',
+    title: '进入 DoDoNow',
+    body: '如果你在登录页，先填写账号信息，然后点击这里进入 DoDoNow。已经进入主界面时，这一步会自动跳过。',
+    targetActionLabel: '点击进入 DoDoNow',
     skipIfMissing: true
   },
   {
@@ -419,6 +419,10 @@ function localUserFromProfile(profile) {
   };
 }
 
+function isBackendUnavailable(error) {
+  return !error.status || error.status >= 500;
+}
+
 function App() {
   const [category, setCategory] = useState('chores');
   const [currentUser, setCurrentUser] = useState(null);
@@ -512,7 +516,7 @@ function App() {
       targetAt.setHours(hour || 0, minute || 0, 0, 0);
       if (targetAt.getTime() < Date.now()) targetAt.setDate(targetAt.getDate() + 1);
       return window.setTimeout(() => {
-        new Notification('WINlist 提醒', { body: `${reminder.time} · ${reminder.title}` });
+        new Notification('DoDoNow 提醒', { body: `${reminder.time} · ${reminder.title}` });
       }, Math.min(targetAt.getTime() - Date.now(), 2147483647));
     });
     return () => timers.forEach((timer) => window.clearTimeout(timer));
@@ -670,6 +674,11 @@ function App() {
       if (tourOpen) resetDemoState();
       else await loadCategory(category);
     } catch (error) {
+      if (isBackendUnavailable(error)) {
+        enterOfflineMode();
+        setApiError('后端暂时不可用，已进入前端模式。');
+        return;
+      }
       setAuthError(error.message);
     }
   }
@@ -1377,7 +1386,7 @@ function App() {
         </section>
       </div>
 
-      {!authChecked && <div className="auth-status">正在连接 WINlist...</div>}
+      {!authChecked && <div className="auth-status">正在连接 DoDoNow...</div>}
       {authChecked && !currentUser && <AuthOverlay error={authError} onSubmit={handleAuthSubmit} onOffline={enterOfflineMode} />}
       {(apiError || stateLoading) && currentUser && (
         <div className={`api-status ${apiError ? 'error' : ''}`}>
@@ -1509,7 +1518,9 @@ function OnboardingIntro({ slides, stepIndex, onNext }) {
   return (
     <div className="intro-layer" role="dialog" aria-modal="true" aria-label="DoDoNow 介绍">
       <section className="intro-card">
-        <img src={asset(slide.image)} alt={slide.alt} />
+        <button className="intro-image-button" type="button" onClick={onNext} aria-label="下一张介绍图">
+          <img src={asset(slide.image)} alt={slide.alt} />
+        </button>
         <footer>
           <span>{stepIndex + 1}/{slides.length}</span>
           <button type="button" onClick={onNext}>下一步</button>
@@ -1707,12 +1718,11 @@ function GuidedTour({ open, steps, stepIndex, onNext, onPrev, onTargetAction, ca
         <span>{stepIndex + 1}/{steps.length}</span>
         <h3>{step.title}</h3>
         <p>{step.body}</p>
-        <strong className={`tour-action-label ${canContinue ? 'done' : ''}`}>{canContinue ? '已看到效果，1.5 秒后自动下一步' : (effectPhase && step.targetActionLabelAfter ? step.targetActionLabelAfter : (step.targetActionLabel || demoClickToContinue))}</strong>
+        <strong className={`tour-action-label ${canContinue ? 'done' : ''}`}>{canContinue ? '已看到效果，1.5 秒后自动继续' : (effectPhase && step.targetActionLabelAfter ? step.targetActionLabelAfter : (step.targetActionLabel || demoClickToContinue))}</strong>
         <footer>
           <button type="button" onClick={onClose}>跳过</button>
           <div>
             <button type="button" disabled={stepIndex === 0} onClick={onPrev}>上一步</button>
-            <button type="button" className="primary" disabled={!canContinue} onClick={onNext}>{stepIndex === steps.length - 1 ? '完成' : '下一步'}</button>
           </div>
         </footer>
       </section>
@@ -1723,7 +1733,7 @@ function GuidedTour({ open, steps, stepIndex, onNext, onPrev, onTargetAction, ca
 function AuthOverlay({ error, onSubmit, onOffline }) {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('olivia@example.com');
-  const [password, setPassword] = useState('winlist123');
+  const [password, setPassword] = useState('dodonow123');
   const [displayName, setDisplayName] = useState('Olivia Vivas');
   const [submitting, setSubmitting] = useState(false);
 
@@ -1737,7 +1747,7 @@ function AuthOverlay({ error, onSubmit, onOffline }) {
   return (
     <div className="auth-overlay">
       <form className="auth-panel" onSubmit={submit}>
-        <img src={asset('winlist-logo-light.png')} alt="WINlist" />
+        <img src={asset('winlist-logo-light.png')} alt="DoDoNow" />
         <div className="auth-tabs">
           <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>登录</button>
           <button type="button" className={mode === 'register' ? 'active' : ''} onClick={() => setMode('register')}>注册</button>
@@ -1746,9 +1756,9 @@ function AuthOverlay({ error, onSubmit, onOffline }) {
         <input value={email} onChange={(event) => setEmail(event.target.value)} placeholder="邮箱" type="email" />
         <input value={password} onChange={(event) => setPassword(event.target.value)} placeholder="密码" type="password" />
         {error && <p className="auth-error">{error}</p>}
-        <button className="primary" data-tour="auth-login-submit" disabled={submitting}>{submitting ? '处理中...' : mode === 'login' ? '进入 WINlist' : '创建账号'}</button>
+        <button className="primary" data-tour="auth-login-submit" disabled={submitting}>{submitting ? '处理中...' : mode === 'login' ? '进入 DoDoNow' : '创建账号'}</button>
         <button className="ghost-action" type="button" onClick={onOffline}>继续使用前端模式</button>
-        <small>种子账号：olivia@example.com / winlist123</small>
+        <small>种子账号：olivia@example.com / dodonow123</small>
       </form>
     </div>
   );
@@ -2383,21 +2393,21 @@ function MemberManager({ mode, category, members, onAdd, onCreate, onDelete, onC
 function ShareSheet({ onClose }) {
   const [copied, setCopied] = useState(false);
   const [method, setMethod] = useState('link');
-  const inviteCode = `WIN-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+  const inviteCode = `DDN-${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
   const shareUrl = window.location.href;
   const shareText = method === 'invite'
-    ? `加入我的 WINlist 协作清单，邀请码：${inviteCode}，入口：${shareUrl}`
-    : `我今天的 WINlist 已经安排好了：${shareUrl}`;
+    ? `加入我的 DoDoNow 协作清单，邀请码：${inviteCode}，入口：${shareUrl}`
+    : `我今天的 DoDoNow 已经安排好了：${shareUrl}`;
   const copy = async () => {
     await navigator.clipboard?.writeText(method === 'link' ? shareUrl : shareText);
     setCopied(true);
   };
 
   return (
-    <Modal title="分享" subtitle="把当前 WINlist 本地页面发给同伴" onClose={onClose}>
+    <Modal title="分享" subtitle="把当前 DoDoNow 本地页面发给同伴" onClose={onClose}>
       <div className="share-sheet">
         <div className="share-preview">
-          <b>WINlist 邀请卡</b>
+          <b>DoDoNow 邀请卡</b>
           <span>一起完成今天的清单</span>
         </div>
         <div className="segmented-row">
@@ -2416,7 +2426,7 @@ function ShareSheet({ onClose }) {
 }
 
 function ShareDoneCard({ target, onClose }) {
-  const shareText = `我完成了 WINlist 任务：${target.task.title}`;
+  const shareText = `我完成了 DoDoNow 任务：${target.task.title}`;
   const [copied, setCopied] = useState(false);
   const copy = async () => {
     await navigator.clipboard?.writeText(shareText);

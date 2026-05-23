@@ -5,7 +5,7 @@ import { createTestDatabase, resetTestDatabase } from './testUtils.js';
 let app;
 let db;
 
-async function login(email = 'olivia@example.com', password = 'winlist123') {
+async function login(email = 'olivia@example.com', password = 'dodonow123') {
   const response = await app.inject({
     method: 'POST',
     url: '/api/auth/login',

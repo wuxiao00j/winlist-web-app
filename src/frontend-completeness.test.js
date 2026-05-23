@@ -3,6 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 const source = readFileSync(new URL('./main.jsx', import.meta.url), 'utf8');
 const styles = readFileSync(new URL('./styles.css', import.meta.url), 'utf8');
+const apiSource = readFileSync(new URL('./api.js', import.meta.url), 'utf8');
 
 describe('frontend completeness surfaces', () => {
   test('uses the API-backed auth and app-state flow', () => {
@@ -117,7 +118,7 @@ describe('frontend completeness surfaces', () => {
       'waitForTargetEffect',
       "TOUR_STEPS[tourStepIndex]?.id === 'long-press'",
       'if (offlineMode || tourOpen) return',
-      '已看到效果，1.5 秒后自动下一步',
+      '已看到效果，1.5 秒后自动继续',
       'finishCurrentStepFirst',
       "advanceOn: 'scroll'"
     ].forEach((tourToken) => {
@@ -151,10 +152,43 @@ describe('frontend completeness surfaces', () => {
       'tourCompleteTimer',
       'tourAutoAdvanceTimer',
       'clearTourAdvanceTimers',
-      '1.5 秒后自动下一步',
+      '1.5 秒后自动继续',
       'tourAutoAdvanceTimer.current = window.setTimeout(() => advanceTour(true), autoAdvanceDelay)'
     ].forEach((tourToken) => {
       expect(source).toContain(tourToken);
+    });
+  });
+
+  test('uses DoDoNow branding and removes guided tour next button', () => {
+    [
+      '进入 DoDoNow',
+      '正在连接 DoDoNow',
+      'DoDoNow 提醒',
+      'DoDoNow 邀请卡',
+      '我完成了 DoDoNow 任务'
+    ].forEach((brandToken) => {
+      expect(source).toContain(brandToken);
+    });
+    expect(source).not.toContain('WINlist');
+    expect(source).not.toContain("className=\"primary\" disabled={!canContinue}");
+    expect(styles).not.toContain('border: 3px solid #111');
+    expect(styles).not.toContain('border: 4px solid #111');
+    expect(styles).not.toContain('border: 2px solid #111');
+  });
+
+  test('login falls back to frontend mode when backend is unavailable', () => {
+    [
+      'isBackendUnavailable',
+      'enterOfflineMode()',
+      '后端暂时不可用，已进入前端模式。'
+    ].forEach((fallbackToken) => {
+      expect(source).toContain(fallbackToken);
+    });
+    [
+      'safeJsonParse',
+      'error.raw = text'
+    ].forEach((fallbackToken) => {
+      expect(apiSource).toContain(fallbackToken);
     });
   });
 
@@ -177,6 +211,21 @@ describe('frontend completeness surfaces', () => {
     expect(source).not.toContain('tour-launcher');
     expect(source).not.toContain('>Demo<');
     expect(styles).toContain('.intro-layer');
+  });
+
+  test('intro slides advance from image taps and mobile layout can scroll instead of clipping', () => {
+    expect(source).toContain('className="intro-image-button"');
+    expect(source).toContain('<img src={asset(slide.image)} alt={slide.alt} />');
+    expect(styles).toContain('.intro-image-button');
+    expect(styles).toContain('display: grid');
+    expect(styles).toContain('place-items: stretch');
+    expect(styles).toContain('appearance: none');
+    expect(styles).toContain('align-self: stretch');
+    expect(styles).toContain('object-fit: cover');
+    expect(styles).toContain('min-height: 100dvh');
+    expect(styles).toContain('height: auto');
+    expect(styles).toContain('overflow: visible');
+    expect(styles).toContain('width: min(430px, 100vw)');
   });
 
   test('profile drawer does not expose the default qq email', () => {

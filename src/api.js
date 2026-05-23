@@ -1,5 +1,14 @@
 const jsonHeaders = { 'Content-Type': 'application/json' };
 
+function safeJsonParse(text) {
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return {};
+  }
+}
+
 async function apiRequest(path, options = {}) {
   const response = await fetch(path, {
     credentials: 'include',
@@ -8,11 +17,12 @@ async function apiRequest(path, options = {}) {
     body: options.body ? JSON.stringify(options.body) : undefined
   });
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  const data = safeJsonParse(text);
   if (!response.ok) {
     const error = new Error(data.error || 'Request failed');
     error.status = response.status;
     error.details = data.details;
+    error.raw = text;
     throw error;
   }
   return data;

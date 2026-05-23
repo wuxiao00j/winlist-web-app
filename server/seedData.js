@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-export const DEFAULT_PASSWORD = 'winlist123';
+export const DEFAULT_PASSWORD = 'dodonow123';
 
 export const seedUsers = [
   { memberId: 'olivia', email: 'olivia@example.com', displayName: 'Olivia Vivas', avatar: 'olivia-avatar.jpeg', statusId: 'wantFish' },

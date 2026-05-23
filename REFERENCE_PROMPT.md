@@ -1,10 +1,10 @@
-# Build a pixel-faithful Web clone of the WINlist iOS app
+# Build a pixel-faithful Web clone of the DoDoNow iOS app
 
 You are building a new Web App. Clone the attached iOS SwiftUI project as closely as possible in a web-only implementation.
 
 ## Goal
 
-Create a mobile-first web app named `WINlist` that visually and interactively reproduces the attached iOS app screenshots/source. The first screen must be the actual app UI, not a landing page.
+Create a mobile-first web app named `DoDoNow` that visually and interactively reproduces the attached iOS app screenshots/source. The first screen must be the actual app UI, not a landing page.
 
 Use the attached screenshots as the primary visual reference, especially the simulator screenshot and existing `screenshots/*.png`. Use attached source files for data, colors, labels, task content, interaction rules, and layout behavior.
 
@@ -219,7 +219,7 @@ The attached Python backend is only a reference for the comment API shape. For t
 Before you finish, verify:
 
 - The default mobile view visually matches the attached iOS screenshot.
-- The app opens directly into the WINlist task UI.
+- The app opens directly into the DoDoNow task UI.
 - Category switching works.
 - Theme switching works.
 - Add/edit/delete task works.

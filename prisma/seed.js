@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 try {
   await setupDatabase(prisma);
   await seedDatabase(prisma);
-  console.log('Seeded WINlist users, friendships, and tasks.');
+  console.log('Seeded DoDoNow users, friendships, and tasks.');
 } finally {
   await prisma.$disconnect();
 }

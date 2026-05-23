@@ -16,7 +16,7 @@ const app = await createApp({ prisma });
 
 try {
   await app.listen({ port, host });
-  app.log.info(`WINlist API listening at http://${host}:${port}`);
+  app.log.info(`DoDoNow API listening at http://${host}:${port}`);
 } catch (error) {
   app.log.error(error);
   process.exit(1);

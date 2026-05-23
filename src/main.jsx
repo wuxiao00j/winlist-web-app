@@ -306,18 +306,18 @@ function emptyTasksByCategory() {
 function formatDuration(minutes) {
   const hours = Math.floor(minutes / 60);
   const rest = minutes % 60;
-  if (hours && rest) return `${hours}h${rest}min`;
+  if (hours && rest) return `${hours}h${rest}m`;
   if (hours) return `${hours}h`;
-  return `${rest}min`;
+  return `${rest}m`;
 }
 
 function totalDuration(tasks) {
   const total = tasks.reduce((sum, task) => sum + task.minutes, 0);
   const hours = Math.floor(total / 60);
   const minutes = total % 60;
-  if (hours && minutes) return `${hours} h ${minutes} min`;
+  if (hours && minutes) return `${hours} h ${minutes} m`;
   if (hours) return `${hours} h`;
-  return `${minutes} min`;
+  return `${minutes} m`;
 }
 
 function taskKey(target) {
@@ -2512,7 +2512,7 @@ function TaskEditor({ target, onClose, onSave, onDelete }) {
             <b>预计</b>
             <b>{hours}h</b>
             <NumberWheel value={minutes} min={0} max={59} onChange={setMinutes} />
-            <b>min</b>
+            <b>m</b>
           </div>
         </EditorRow>
         <EditorRow label="细分待办">

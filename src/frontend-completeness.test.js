@@ -228,6 +228,29 @@ describe('frontend completeness surfaces', () => {
     expect(styles).toContain('width: min(430px, 100vw)');
   });
 
+  test('work tiled layout keeps lower members clear of the done title and bottom nav', () => {
+    expect(styles).toContain('max-height: 500px');
+    expect(styles).toContain('padding-bottom: 128px');
+    expect(styles).toContain('scroll-padding-bottom: 128px');
+    expect(styles).toContain('height: 16px');
+    expect(styles).toContain('justify-content: center');
+    expect(styles).toContain('top: 50%');
+    expect(styles).toContain('transform: translateY(-50%)');
+  });
+
+  test('duration labels use m instead of min', () => {
+    expect(source).toContain('return `${hours}h${rest}m`;');
+    expect(source).toContain('return `${rest}m`;');
+    expect(source).toContain('return `${hours} h ${minutes} m`;');
+    expect(source).toContain('return `${minutes} m`;');
+    expect(source).toContain('<b>m</b>');
+    expect(source).not.toContain('return `${hours}h${rest}min`;');
+    expect(source).not.toContain('return `${rest}min`;');
+    expect(source).not.toContain('return `${hours} h ${minutes} min`;');
+    expect(source).not.toContain('return `${minutes} min`;');
+    expect(source).not.toContain('<b>min</b>');
+  });
+
   test('profile drawer does not expose the default qq email', () => {
     expect(source).not.toContain('807652164@qq.com');
     expect(source).not.toContain('<p>{email}</p>');

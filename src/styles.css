@@ -198,9 +198,11 @@ button {
 }
 
 .members.work-members.tiled {
-  max-height: 570px;
+  max-height: 500px;
   overflow-y: auto;
   padding-right: 3px;
+  padding-bottom: 128px;
+  scroll-padding-bottom: 128px;
 }
 
 .member-column {
@@ -279,10 +281,13 @@ button {
 .battery-line {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 5px;
+  height: 16px;
   font-family: ui-rounded, system-ui, sans-serif;
   font-size: 8.5px;
   font-weight: 900;
+  line-height: 1;
 }
 
 .battery {
@@ -292,13 +297,17 @@ button {
   border: 0;
   border-radius: 4px;
   box-shadow: inset 0 0 0 2px currentColor;
+  display: flex;
+  align-items: center;
+  padding-left: 3px;
 }
 
 .battery::after {
   content: '';
   position: absolute;
   right: -5px;
-  top: 2px;
+  top: 50%;
+  transform: translateY(-50%);
   width: 3px;
   height: 5px;
   border-radius: 2px;
@@ -308,7 +317,6 @@ button {
 .battery i {
   display: block;
   height: 6px;
-  margin: 1px;
   border-radius: 2px;
   background: var(--win-green-dot);
 }
